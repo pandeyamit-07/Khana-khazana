@@ -1,0 +1,49 @@
+Khana Khazana - POS Application
+
+
+Phase 1: Project Scaffolding & Backend
+ Scaffold project structure (server + client)
+ Set up Express server with MongoDB connection
+ Create MongoDB models (User, MenuItem, Order)
+ Implement Auth routes (login, signup, JWT)
+ Implement Menu API routes
+ Implement Order API routes
+ Implement Inventory API routes (admin)
+ Set up Multer for image uploads
+ Add JWT & role-based middleware
+
+
+Phase 2: React Frontend Setup
+ Initialize React app with Vite
+ Set up React Router v6 with protected routes
+ Create Auth context & Axios interceptor
+ Build Login & Signup pages
+
+
+Phase 3: Main POS Interface
+ Build top navbar
+ Build left sidebar (category list)
+ Build menu item grid
+ Build right order panel (Dine In/Delivery/Pick Up tabs)
+ Implement order placement flow
+
+
+Phase 4: Current Orders Page
+ Build order filters sidebar
+ Build order card grid
+ Implement polling for real-time updates
+ Implement "Delivered" functionality
+
+
+Phase 5: Admin Panel
+ Build admin dashboard layout
+ Inventory management grid
+ Add/Edit/Delete item modals
+ Admin order management
+
+ 
+Phase 6: Verification
+ Test auth flow in browser
+ Test POS ordering flow
+ Test admin inventory CRUD
+ Test current orders & delivery

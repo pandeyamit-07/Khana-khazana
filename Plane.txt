@@ -1,0 +1,104 @@
+Khana Khazana - Full-Stack POS Application
+
+Build a full-stack Restaurant POS web app using MERN stack (MongoDB, Express, React, Node.js) with JWT auth, order management, and admin inventory panel.
+
+Proposed Changes
+Project Scaffolding
+
+[NEW] server/package.json
+Node.js backend with dependencies: express, mongoose, cors, dotenv, bcryptjs, jsonwebtoken, multer.
+
+[NEW] server/.env
+Environment variables: MONGO_URI, JWT_SECRET, PORT.
+
+[NEW] server/server.js
+Express app entry point — connects to MongoDB, registers middleware (CORS, JSON parsing, static uploads), mounts API routes.
+
+Backend Models
+[NEW] server/models/User.js
+Mongoose schema: name, email, password (hashed via bcryptjs pre-save hook), role (admin/staff), createdAt.
+
+[NEW] server/models/MenuItem.js
+Mongoose schema: name, description, image, price, category, quantity, createdAt.
+
+[NEW] server/models/Order.js
+Mongoose schema: orderNumber (auto-increment counter), type, tableNumber, items[], subtotal, gst, total, paymentMethod, customerName, customerMobile, status, createdAt.
+
+Backend Middleware
+[NEW] server/middleware/auth.js
+protect — verifies JWT from Authorization header, attaches req.user
+isAdmin — checks req.user.role === 'admin'
+
+
+Backend Routes & Controllers
+
+[NEW] server/routes/auth.js & server/controllers/authController.js
+POST /api/auth/signup — register user (hash password, return JWT)
+POST /api/auth/login — login (compare password, return JWT)
+GET /api/auth/me — return logged-in user info
+
+[NEW] server/routes/menu.js & server/controllers/menuController.js
+GET /api/menu — list all menu items (public)
+GET /api/menu/:id — single item
+POST /api/menu — create item (admin, multer image)
+PUT /api/menu/:id — update item (admin, multer image)
+DELETE /api/menu/:id — delete item (admin)
+
+[NEW] server/routes/orders.js & server/controllers/orderController.js
+GET /api/orders — list orders (optionally filter by status/type)
+POST /api/orders — place new order (decrements quantity from MenuItem)
+PUT /api/orders/:id/deliver — mark order as delivered
+
+[NEW] server/routes/inventory.js & server/controllers/inventoryController.js
+PUT /api/inventory/:id — update stock/quantity (admin)
+
+React Frontend
+[NEW] client/ (Vite + React project)
+Scaffolded with npx create-vite. Dependencies: react-router-dom, axios, react-hot-toast, react-icons.
+
+[NEW] client/src/main.jsx
+App entry — wraps with BrowserRouter and AuthProvider.
+
+[NEW] client/src/context/AuthContext.jsx
+Context provider: stores user & token in state + localStorage, provides login, signup, logout. Sets up Axios interceptor for Authorization header.
+
+[NEW] client/src/components/ProtectedRoute.jsx
+Route wrapper — redirects to /login if unauthenticated. AdminRoute variant checks role === 'admin'.
+
+[NEW] client/src/pages/Login.jsx & client/src/pages/Signup.jsx
+Auth forms with email/password. Red primary color theme, toast notifications.
+
+[NEW] client/src/pages/POS.jsx
+Main POS interface with:
+
+Top navbar (app name, user info)
+Left sidebar (category filter)
+Center grid (menu items)
+Right panel (order builder with Dine In / Delivery / Pick Up tabs, GST calc, payment, place order)
+
+[NEW] client/src/pages/CurrentOrders.jsx
+Left sidebar with order type filters
+Card grid of active orders with item table, total, customer info, "Delivered" button
+Polling every 10 seconds
+
+[NEW] client/src/pages/admin/Inventory.jsx
+Grid of menu items with images, edit/delete buttons
+Floating "+" button → Add Item modal
+Edit modal pre-filled with item data
+Delete confirmation dialog
+
+[NEW] client/src/index.css
+Global styles — primary red #e53e3e, clean white background, responsive grid layouts, card styles, animations.
+
+Verification Plan
+Automated Browser Tests
+Start servers: Run npm start in /server and npm run dev in /client
+Auth flow: Use the browser tool to navigate to the app, sign up a new user, log in, and verify redirect to POS
+POS flow: Click a category, add items to order, fill in customer details, place an order, and verify toast notification
+Current orders: Navigate to Current Orders, verify the placed order appears, click "Delivered"
+Admin flow: Log in as admin, navigate to /admin/inventory, add a new menu item, edit it, delete it
+Protected routes: Verify non-admin users cannot access /admin
+Manual Verification
+The user can verify the UI aesthetics and responsiveness by resizing the browser window
+The user can check MongoDB data via a MongoDB client to confirm orders are stored correctly
+
