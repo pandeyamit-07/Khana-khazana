@@ -26,7 +26,7 @@ export default function Inventory() {
             return imagePath;
         }
         // Backend is running on same domain but different port for dev
-        const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const backendUrl = import.meta.env.VITE_API_BASE_URL;
         return `${backendUrl}/${imagePath}`;
     };
 

@@ -24,21 +24,44 @@ const CATEGORY_ICONS = {
 };
 
 // Helper: resolve item image URL
+// const getImageUrl = (item) => {
+//     if (!item.image) return null;
+//     // If it's an absolute URL already
+//     if (item.image.startsWith('http')) return item.image;
+//     // images/ prefix (seeded images)
+//     if (item.image.startsWith('images/') || item.image.startsWith('/images/')) {
+//         return item.image.startsWith('/') ? item.image : `/${item.image}`;
+//     }
+//     // uploads/ prefix (admin-uploaded images)
+//     if (item.image.startsWith('uploads/') || item.image.startsWith('/uploads/')) {
+//         return item.image.startsWith('/') ? item.image : `/${item.image}`;
+//     }
+//     // bare filename → assume /images/
+//     return `/images/${item.image}`;
+// };
 const getImageUrl = (item) => {
-    if (!item.image) return null;
-    // If it's an absolute URL already
-    if (item.image.startsWith('http')) return item.image;
-    // images/ prefix (seeded images)
-    if (item.image.startsWith('images/') || item.image.startsWith('/images/')) {
-        return item.image.startsWith('/') ? item.image : `/${item.image}`;
+    // 1. Path extract karein (item object ho ya string)
+    const rawPath = typeof item === 'string' ? item : item?.image;
+    if (!rawPath) return null;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    // 2. Path ko clean karein (Extra slashes aur duplicate "images" hatayein)
+    // Hum sirf filename/folder wala part nikalenge
+    let cleanPath = rawPath;
+    
+    // Agar path "/images/burger/cheese.jpeg" hai toh use "burger/cheese.jpeg" banayega
+    if (cleanPath.startsWith('/images/')) {
+        cleanPath = cleanPath.substring(8); 
+    } else if (cleanPath.startsWith('images/')) {
+        cleanPath = cleanPath.substring(7);
     }
-    // uploads/ prefix (admin-uploaded images)
-    if (item.image.startsWith('uploads/') || item.image.startsWith('/uploads/')) {
-        return item.image.startsWith('/') ? item.image : `/${item.image}`;
-    }
-    // bare filename → assume /images/
-    return `/images/${item.image}`;
+
+    // 3. Final URL: baseUrl + /images/ + cleanPath
+    // Result: https://...vercel.app/images/burger/cheese.jpeg
+    return `${baseUrl}/images/${cleanPath}`;
 };
+
 
 export default function POS() {
     const { user } = useAuth();
@@ -63,22 +86,30 @@ export default function POS() {
     }, []);
 
     const fetchMenu = async () => {
-        try {
-            const res = await api.get('/menu');
-            setMenuItems(res.data);
-            const cats = [...new Set(res.data.map((item) => item.category))];
+    try {
+        const res = await api.get('/menu');
+        
+        // Ek hi baar data process karke set karein
+        const items = res.data?.data || (Array.isArray(res.data) ? res.data : []);
+        
+        setMenuItems(items);
+
+        // Agar categories set karni hai to yahan items use karein (res.data nahi)
+        if (items.length > 0) {
+            const cats = [...new Set(items.map((item) => item.category))];
             setCategories(cats);
-        } catch (err) {
-            toast.error('Failed to load menu');
         }
-    };
+    } catch (err) {
+        console.error("Fetch Menu Error:", err);
+        toast.error('Failed to load menu');
+        setMenuItems([]); // Error case mein empty array set karein taaki .map fail na ho
+    }
+};
 
     // Filter items by category
-    const filteredItems =
-        activeCategory === 'All'
-            ? menuItems
-            : menuItems.filter((item) => item.category === activeCategory);
-
+    const filteredItems = activeCategory === 'All' 
+    ? (menuItems || []) 
+    : (menuItems || []).filter((item) => item.category === activeCategory);
     // Add item to order
     const addToOrder = (item) => {
         if (item.quantity <= 0) {
@@ -239,7 +270,7 @@ Payment:   ${paymentMethod.toUpperCase()}
                         <h2>{activeCategory === 'All' ? 'All Menu Items' : activeCategory}</h2>
                         <span className="menu-count">{filteredItems.length} items</span>
                     </div>
-                    {filteredItems.length === 0 ? (
+                    {(filteredItems?.length === 0 || !filteredItems) ? (
                         <div className="empty-state">
                             <div className="empty-state-icon">🍽️</div>
                             <h3>No items found</h3>
@@ -247,7 +278,7 @@ Payment:   ${paymentMethod.toUpperCase()}
                         </div>
                     ) : (
                         <div className="menu-grid">
-                            {filteredItems.map((item) => {
+                            {filteredItems?.map((item) => {
                                 const imgUrl = getImageUrl(item);
                                 const inCart = orderItems.find((o) => o.menuItem === item._id);
                                 return (

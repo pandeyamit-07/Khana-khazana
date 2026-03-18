@@ -1,4 +1,4 @@
-Khana Khazana - POS Application
+Khana khazana - POS Application
 
 
 Phase 1: Project Scaffolding & Backend

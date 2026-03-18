@@ -1,4 +1,4 @@
-Khana Khazana — POS Application Walkthrough
+Khana khazana — POS Application Walkthrough
 What Was Built
 A full-stack MERN Restaurant POS application with:
 

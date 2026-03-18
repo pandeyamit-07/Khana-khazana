@@ -19,12 +19,35 @@ export default function Inventory() {
     });
     const [imageFile, setImageFile] = useState(null);
 
-    const getImageUrl = (imagePath) => {
-        if (!imagePath) return null;
-        if (imagePath.startsWith('http') || imagePath.startsWith('//')) return imagePath;
-        if (imagePath.startsWith('/')) return imagePath;
-        return `/${imagePath}`;
-    };
+    // const getImageUrl = (imagePath) => {
+    //     if (!imagePath) return null;
+    //     if (imagePath.startsWith('http') || imagePath.startsWith('//')) return imagePath;
+    //     if (imagePath.startsWith('/')) return imagePath;
+    //     return `/${imagePath}`;
+    // };
+
+    const getImageUrl = (item) => {
+    // 1. Path extract karein (item object ho ya string)
+    const rawPath = typeof item === 'string' ? item : item?.image;
+    if (!rawPath) return null;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    // 2. Path ko clean karein (Extra slashes aur duplicate "images" hatayein)
+    // Hum sirf filename/folder wala part nikalenge
+    let cleanPath = rawPath;
+    
+    // Agar path "/images/burger/cheese.jpeg" hai toh use "burger/cheese.jpeg" banayega
+    if (cleanPath.startsWith('/images/')) {
+        cleanPath = cleanPath.substring(8); 
+    } else if (cleanPath.startsWith('images/')) {
+        cleanPath = cleanPath.substring(7);
+    }
+
+    // 3. Final URL: baseUrl + /images/ + cleanPath
+    // Result: https://...vercel.app/images/burger/cheese.jpeg
+    return `${baseUrl}/images/${cleanPath}`;
+};
 
     useEffect(() => { fetchItems(); }, []);
 

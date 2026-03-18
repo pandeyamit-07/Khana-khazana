@@ -1,4 +1,4 @@
-Khana Khazana - Full-Stack POS Application
+Khana khazana - Full-Stack POS Application
 
 Build a full-stack Restaurant POS web app using MERN stack (MongoDB, Express, React, Node.js) with JWT auth, order management, and admin inventory panel.
 

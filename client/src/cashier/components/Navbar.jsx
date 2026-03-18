@@ -82,7 +82,7 @@ export default function Navbar({ activePage }) {
         <nav className="navbar">
             <div className="navbar-brand">
                 <span className="brand-icon">🍽️</span>
-                <span>Khana Khazana</span>
+                <span>Khana khazana</span>
             </div>
 
             <div className="nav-tabs">

@@ -10,16 +10,40 @@ const CATEGORY_ICONS = {
     'Rice': '🍚', 'Roti': '🫓',
 };
 
+// const getImageUrl = (item) => {
+//     if (!item.image) return null;
+//     if (item.image.startsWith('http')) return item.image;
+//     if (item.image.startsWith('/')) return item.image;
+//     return `/${item.image}`;
+// };
+
 const getImageUrl = (item) => {
-    if (!item.image) return null;
-    if (item.image.startsWith('http')) return item.image;
-    if (item.image.startsWith('/')) return item.image;
-    return `/${item.image}`;
+    // 1. Path extract karein (item object ho ya string)
+    const rawPath = typeof item === 'string' ? item : item?.image;
+    if (!rawPath) return null;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    // 2. Path ko clean karein (Extra slashes aur duplicate "images" hatayein)
+    // Hum sirf filename/folder wala part nikalenge
+    let cleanPath = rawPath;
+    
+    // Agar path "/images/burger/cheese.jpeg" hai toh use "burger/cheese.jpeg" banayega
+    if (cleanPath.startsWith('/images/')) {
+        cleanPath = cleanPath.substring(8); 
+    } else if (cleanPath.startsWith('images/')) {
+        cleanPath = cleanPath.substring(7);
+    }
+
+    // 3. Final URL: baseUrl + /images/ + cleanPath
+    // Result: https://...vercel.app/images/burger/cheese.jpeg
+    return `${baseUrl}/images/${cleanPath}`;
 };
 
 // Public api (no auth)
-const publicApi = axios.create({ baseURL: '/api' });
-
+const publicApi = axios.create({
+    baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`
+});
 export default function CustomerMenu() {
     const [menuItems, setMenuItems] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -43,9 +67,11 @@ export default function CustomerMenu() {
     const fetchMenu = async () => {
         try {
             const res = await publicApi.get('/menu');
-            setMenuItems(res.data);
-            const cats = [...new Set(res.data.map((item) => item.category))];
+            const items = res.data.data || res.data;
+            setMenuItems(items);
+            const cats = [...new Set(items.map((item) => item.category))];
             setCategories(cats);
+            console.log("API RESPONSE:", res.data);
         } catch {
             toast.error('Could not load menu');
         }
