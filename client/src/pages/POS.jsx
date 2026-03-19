@@ -5,6 +5,7 @@ import api from '../api/axiosInstance';
 import toast from 'react-hot-toast';
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { SkeletonGrid } from '../components/SkeletonLoader';
 
 const CATEGORY_ICONS = {
     'Refreshments': '🥤',
@@ -38,6 +39,7 @@ export default function POS() {
     const [customerMobile, setCustomerMobile] = useState('');
     const [customerAddress, setCustomerAddress] = useState('');
     const [placing, setPlacing] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // Fetch menu items
     useEffect(() => {
@@ -46,12 +48,15 @@ export default function POS() {
 
     const fetchMenu = async () => {
         try {
+            setLoading(true);
             const res = await api.get('/menu');
             setMenuItems(res.data);
             const cats = [...new Set(res.data.map((item) => item.category))];
             setCategories(cats);
         } catch (err) {
             toast.error('Failed to load menu');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -225,9 +230,11 @@ Payment:   ${paymentMethod.toUpperCase()}
                 <div className="menu-section">
                     <div className="menu-header">
                         <h2>{activeCategory === 'All' ? 'All Menu Items' : activeCategory}</h2>
-                        <span className="menu-count">{filteredItems.length} items</span>
+                        <span className="menu-count">{loading ? '...' : filteredItems.length} items</span>
                     </div>
-                    {filteredItems.length === 0 ? (
+                    {loading ? (
+                        <SkeletonGrid count={9} type="menu" />
+                    ) : filteredItems.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-state-icon">🍽️</div>
                             <h3>No items found</h3>

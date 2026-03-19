@@ -8,12 +8,14 @@ import {
     FiEdit2, FiTrash2, FiPlus, FiMinus, FiX, FiSave
 } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { SkeletonGrid } from '../components/SkeletonLoader';
 
 export default function CurrentOrders() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [filter, setFilter] = useState('all');
+    const [loading, setLoading] = useState(true);
 
     // Edit modal state
     const [editOrder, setEditOrder] = useState(null);
@@ -27,10 +29,13 @@ export default function CurrentOrders() {
     }, []);
 
     const fetchOrders = async () => {
-        try {
+        try setLoading(true);
             const res = await api.get('/orders?status=active');
             setOrders(res.data);
         } catch (err) {
+            console.error('Failed to fetch orders');
+        } finally {
+            setLoading(false
             console.error('Failed to fetch orders');
         }
     };
@@ -139,9 +144,11 @@ export default function CurrentOrders() {
                 <div className="orders-grid-section">
                     <div className="menu-header">
                         <h2>Active Orders</h2>
-                        <span className="menu-count">{filteredOrders.length} orders</span>
+                        <span className="menu-count">{loading ? '...' : filteredOrders.length} orders</span>
                     </div>
-                    {filteredOrders.length === 0 ? (
+                    {loading ? (
+                        <SkeletonGrid count={6} type="menu" />
+                    ) : filteredOrders.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-state-icon">📋</div>
                             <h3>No active orders</h3>

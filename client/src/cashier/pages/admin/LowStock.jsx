@@ -3,6 +3,7 @@ import api from '../../../api/axiosInstance';
 import toast from 'react-hot-toast';
 import { FiEdit2, FiX, FiSave, FiAlertTriangle, FiPackage } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
+import { SkeletonTable } from '../../../components/SkeletonLoader';
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -73,7 +74,7 @@ export default function LowStock() {
                 </div>
 
                 {loading ? (
-                    <div className="ls-loading"><div className="spinner" /><p>Checking stock levels…</p></div>
+                    <SkeletonTable rows={5} />
                 ) : items.length === 0 ? (
                     <div className="ls-empty"><FiPackage size={48} className="ls-empty-icon" /><h3>All good! 🎉</h3><p>All items are sufficiently stocked.</p></div>
                 ) : (

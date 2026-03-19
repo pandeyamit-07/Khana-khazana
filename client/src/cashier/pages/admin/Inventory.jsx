@@ -5,6 +5,7 @@ import api from '../../../api/axiosInstance';
 import toast from 'react-hot-toast';
 import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
+import { SkeletonGrid } from '../../../components/SkeletonLoader';
 
 export default function Inventory() {
     const { user } = useAuth();
@@ -14,6 +15,7 @@ export default function Inventory() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         name: '', description: '', price: '', category: '', quantity: '',
     });
@@ -53,10 +55,13 @@ export default function Inventory() {
 
     const fetchItems = async () => {
         try {
+            setLoading(true);
             const res = await api.get('/menu');
             setItems(res.data);
         } catch (err) {
             toast.error('Failed to load inventory');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -170,9 +175,11 @@ export default function Inventory() {
             <div style={{ padding: '1.5rem', overflow: 'auto', height: 'calc(100vh - 64px)' }}>
                 <div className="inventory-header">
                     <h2>📦 Inventory Management</h2>
-                    <span className="menu-count">{items.length} items</span>
+                    <span className="menu-count">{loading ? '...' : items.length} items</span>
                 </div>
-                {items.length === 0 ? (
+                {loading ? (
+                    <SkeletonGrid count={9} type="inventory" />
+                ) : items.length === 0 ? (
                     <div className="empty-state">
                         <div className="empty-state-icon">📦</div>
                         <h3>No items in inventory</h3>

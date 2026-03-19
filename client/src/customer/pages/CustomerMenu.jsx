@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FiShoppingCart, FiPlus, FiMinus, FiTrash2, FiX, FiMapPin, FiPhone, FiUser } from 'react-icons/fi';
+import { SkeletonGrid } from '../../components/SkeletonLoader';
 
 const CATEGORY_ICONS = {
     'Refreshments': '🥤', 'Breakfast': '🍳', 'Pavbhaji': '🍛', 'Frankie': '🌯',
@@ -50,6 +51,7 @@ export default function CustomerMenu() {
     const [activeCategory, setActiveCategory] = useState('All');
     const [cart, setCart] = useState([]); // { menuItem, name, qty, price, image }
     const [cartOpen, setCartOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // Order form state
     const [orderType, setOrderType] = useState('dine-in');
@@ -66,6 +68,7 @@ export default function CustomerMenu() {
 
     const fetchMenu = async () => {
         try {
+            setLoading(true);
             const res = await publicApi.get('/menu');
             const items = res.data.data || res.data;
             setMenuItems(items);
@@ -74,6 +77,8 @@ export default function CustomerMenu() {
             console.log("API RESPONSE:", res.data);
         } catch {
             toast.error('Could not load menu');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -197,10 +202,12 @@ export default function CustomerMenu() {
                 <main className="customer-menu">
                     <div className="customer-menu-header">
                         <h2>{activeCategory === 'All' ? 'Our Menu' : activeCategory}</h2>
-                        <span className="customer-menu-count">{filteredItems.length} items</span>
+                        <span className="customer-menu-count">{loading ? '...' : filteredItems.length} items</span>
                     </div>
 
-                    {filteredItems.length === 0 ? (
+                    {loading ? (
+                        <SkeletonGrid count={9} type="menu" />
+                    ) : filteredItems.length === 0 ? (
                         <div className="customer-empty">
                             <div style={{ fontSize: '3rem' }}>🍽️</div>
                             <p>No items in this category</p>
