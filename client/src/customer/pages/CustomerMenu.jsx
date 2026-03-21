@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiPlus, FiMinus, FiTrash2, FiX, FiMapPin, FiPhone, FiUser } from 'react-icons/fi';
+import { FiShoppingCart, FiPlus, FiMinus, FiTrash2, FiX, FiMapPin, FiPhone, FiUser, FiMenu } from 'react-icons/fi';
 import { SkeletonGrid } from '../../components/SkeletonLoader';
 
 const CATEGORY_ICONS = {
@@ -52,6 +52,7 @@ export default function CustomerMenu() {
     const [cart, setCart] = useState([]); // { menuItem, name, qty, price, image }
     const [cartOpen, setCartOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Order form state
     const [orderType, setOrderType] = useState('dine-in');
@@ -160,6 +161,12 @@ export default function CustomerMenu() {
         <div className="customer-layout">
             {/* ── HEADER ── */}
             <header className="customer-header">
+                <button 
+                    className="customer-menu-toggle"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                    <FiMenu size={20} />
+                </button>
                 <div className="customer-brand">
                     <span className="customer-brand-icon">🍽️</span>
                     <div>
@@ -178,12 +185,23 @@ export default function CustomerMenu() {
             </header>
 
             <div className="customer-body">
+                {/* ── SIDEBAR OVERLAY (Mobile) ── */}
+                {sidebarOpen && (
+                    <div 
+                        className="customer-sidebar-overlay mobile-open"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
+
                 {/* ── LEFT: Category Sidebar ── */}
-                <aside className="customer-sidebar">
+                <aside className={`customer-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
                     <div className="customer-sidebar-title">Categories</div>
                     <button
                         className={`customer-cat-btn ${activeCategory === 'All' ? 'active' : ''}`}
-                        onClick={() => setActiveCategory('All')}
+                        onClick={() => {
+                            setActiveCategory('All');
+                            setSidebarOpen(false);
+                        }}
                     >
                         <span>📋</span> All Items
                     </button>
@@ -191,7 +209,10 @@ export default function CustomerMenu() {
                         <button
                             key={cat}
                             className={`customer-cat-btn ${activeCategory === cat ? 'active' : ''}`}
-                            onClick={() => setActiveCategory(cat)}
+                            onClick={() => {
+                                setActiveCategory(cat);
+                                setSidebarOpen(false);
+                            }}
                         >
                             <span>{CATEGORY_ICONS[cat] || '🍴'}</span> {cat}
                         </button>
